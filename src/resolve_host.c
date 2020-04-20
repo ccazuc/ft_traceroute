@@ -1,0 +1,40 @@
+#include "ft_traceroute.h"
+
+void resolve_host(t_env *env)
+{
+	struct addrinfo hints;
+	struct addrinfo *result;
+	char ip[16];
+
+	ft_memset(&hints, 0, sizeof(hints));
+	hints.ai_family = env->params.af;
+	hints.ai_socktype = SOCK_RAW;
+	hints.ai_protocol = env->params.protocol;
+	if (getaddrinfo(env->dst_param, NULL, &hints, &result) || !result)
+		print_unknown_dst(env->dst_param);
+	ft_memset(ip, 0, sizeof(ip));
+	if (!(env->dst_bin = malloc(strlen(ip) + 1)))
+		ft_exit("Error, could not malloc dst_bin", EXIT_FAILURE);
+	strcpy(env->dst_bin, ip);
+	if (!inet_ntop(env->params.af, &((struct sockaddr_in*)result->ai_addr)->sin_addr, ip, INET_ADDRSTRLEN))
+		print_unknown_dst(env->dst_param);
+	if (!(env->dst_name = malloc(strlen(ip) + 1)))
+		ft_exit("Error, could not malloc dst_name", EXIT_FAILURE);
+	strcpy(env->dst_name, ip);
+	if (!(env->dst_sockaddr = malloc(sizeof(*env->dst_sockaddr))))
+		ft_exit("Error, could not malloc dst_sockaddr", EXIT_FAILURE);
+	memset(env->dst_sockaddr, 0, sizeof(*env->dst_sockaddr));
+	memcpy(env->dst_sockaddr, result->ai_addr, result->ai_addrlen);
+	env->dst_sockaddrlen = result->ai_addrlen;
+	free(result);
+	struct in_addr addr;
+	if (!inet_aton(env->dst_name, &addr))
+		return;
+	struct hostent *hent;
+	if (!(hent = gethostbyaddr((char*)&(addr.s_addr), sizeof(addr.s_addr), env->params.af)))
+		return;
+	if (!(env->dst_subname = malloc(strlen(hent->h_name) + 1)))
+		ft_exit("Error, could not malloc dst_subname", EXIT_FAILURE);
+	printf("hent_name %s\n", hent->h_name);
+	strcpy(env->dst_subname, hent->h_name);
+}

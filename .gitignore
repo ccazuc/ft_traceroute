@@ -1,0 +1,6 @@
+ft_traceroute
+*.o
+*.swp
+*.swo
+obj
+libft/obj
