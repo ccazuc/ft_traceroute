@@ -13,9 +13,9 @@ void resolve_host(t_env *env)
 	if (getaddrinfo(env->dst_param, NULL, &hints, &result) || !result)
 		print_unknown_dst(env->dst_param);
 	ft_memset(ip, 0, sizeof(ip));
-	if (!(env->dst_bin = malloc(strlen(ip) + 1)))
+	if (!(env->dst_bin = malloc(sizeof(*env->dst_bin))))
 		ft_exit("Error, could not malloc dst_bin", EXIT_FAILURE);
-	strcpy(env->dst_bin, ip);
+	memcpy(env->dst_bin, &((struct sockaddr_in*)result->ai_addr)->sin_addr, sizeof(*env->dst_bin));
 	if (!inet_ntop(env->params.af, &((struct sockaddr_in*)result->ai_addr)->sin_addr, ip, INET_ADDRSTRLEN))
 		print_unknown_dst(env->dst_param);
 	if (!(env->dst_name = malloc(strlen(ip) + 1)))

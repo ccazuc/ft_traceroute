@@ -11,6 +11,7 @@
 # include <sys/socket.h>
 # include <arpa/inet.h>
 # include <netdb.h>
+# include <sys/time.h>
 
 typedef struct s_params
 {
@@ -24,8 +25,16 @@ typedef struct s_params
 typedef struct s_icmp_packet
 {
 	struct ip ip_hdr;
-	struct icmp icmp_hdr;
+	struct icmphdr icmp_hdr;
 } t_icmp_packet;
+
+typedef struct s_icmp_tim_ex_packet
+{
+	struct ip ip_hdr;
+	struct icmphdr icmp_hdr;
+	struct ip ip_hdr_encaps;
+	struct icmphdr icmp_hdr_encaps;
+} t_icmp_time_ex_packet;
 
 typedef struct s_udp_packet
 {
@@ -37,12 +46,19 @@ typedef struct s_env
 {
 	t_params params;
 	char *dst_param;		// host str from argv
-	char *dst_bin;			// host bin from getaddrinfo
+	struct in_addr *dst_bin;	// host bin from getaddrinfo
 	char *dst_name;			// host str from inet_ntop
 	char *dst_subname;		// host str from gethostbyaddr
 	struct sockaddr *dst_sockaddr;	// host sockaddr from getaddrinfo
 	uint16_t dst_sockaddrlen;	// len of sockaddr from getaddrinfo
-	int32_t socket;
+	int32_t send_socket;
+	int32_t receive_socket;
+	uint32_t count;
+	uint16_t packet_len;
+	uint8_t running;
+	t_icmp_packet *send_packet_icmp;
+	t_udp_packet *send_packet_udp;
+	t_icmp_time_ex_packet *receive_packet;
 } t_env;
 
 void parse_args(t_env *env, int argc, char **argv);
@@ -50,5 +66,11 @@ void print_usage(int32_t code);
 void print_invalid_param(uint8_t param, uint32_t index);
 void print_unknown_dst(char *dst);
 void resolve_host(t_env *env);
+void create_socket(t_env *env);
+void build_packet(t_env *env);
+void build_icmp_checksum(t_env *env);
+size_t get_time();
+void send_packet(t_env *env);
+void receive_packet(t_env *env);
 
 #endif

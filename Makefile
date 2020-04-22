@@ -12,6 +12,11 @@ SRCS_NAME = main.c \
 			parse_args.c \
 			print.c \
 			resolve_host.c \
+			create_socket.c \
+			build_packet.c \
+			send_packet.c \
+			get_time.c \
+			receive_packet.c \
 			
 SRCS = $(addprefix $(SRCS_PATH), $(SRCS_NAME))
 
