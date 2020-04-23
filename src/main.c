@@ -7,7 +7,7 @@ static t_env *create_env(void)
 	if (!(env = malloc(sizeof(*env))))
 		ft_exit("Error, could not malloc env", EXIT_FAILURE);
 	env->params.count = 3;
-	env->params.payload_size = 32;
+	env->params.payload_size = 150;
 	env->params.verbose = 0;
 	env->params.protocol = IPPROTO_ICMP;
 	env->params.af = AF_INET;
@@ -22,6 +22,8 @@ static t_env *create_env(void)
 	env->receive_socket = 0;
 	env->count = 0;
 	env->running = 1;
+	env->send_per_ttl = 3;
+	env->begin_list = NULL;
 	return env;
 }
 

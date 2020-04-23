@@ -6,6 +6,10 @@ static void alloc_packet(t_env *env)
 	{
 		if (!(env->send_packet_icmp = malloc(sizeof(env->send_packet_icmp->ip_hdr) + ICMP_MINLEN + env->params.payload_size)))
 			ft_exit("Error, could not malloc send_packet", EXIT_FAILURE);
+		memset(env->send_packet_icmp, 0, sizeof(env->send_packet_icmp->ip_hdr) + ICMP_MINLEN + env->params.payload_size);
+		if (!(env->receive_packet = malloc(sizeof(*env->receive_packet) + env->params.payload_size)))
+			ft_exit("Error, coult not malloc receive_packet", EXIT_FAILURE);
+		printf("%p => %p\n", env->send_packet_icmp, (unsigned char*)env->send_packet_icmp + sizeof(env->send_packet_icmp->ip_hdr) + ICMP_MINLEN + env->params.payload_size);
 	}
 	else if (env->params.protocol == IPPROTO_UDP)
 	{
@@ -16,8 +20,6 @@ static void alloc_packet(t_env *env)
 	{
 		ft_exit("Error, protocol not supported", EXIT_FAILURE);
 	}
-	if (!(env->receive_packet = malloc(sizeof(env->receive_packet->ip_hdr) + ICMP_MINLEN + env->params.payload_size)))
-		ft_exit("Error, coult not malloc receive_packet", EXIT_FAILURE);
 }
 
 void build_icmp_checksum(t_env *env)
@@ -52,7 +54,7 @@ static void build_ip_header(t_env *env)
 	ip_hdr->ip_tos = IPTOS_LOWDELAY;
 	ip_hdr->ip_id = 0;
 	ip_hdr->ip_off = ntohs(IP_DF);
-	ip_hdr->ip_ttl = 4;
+	ip_hdr->ip_ttl = 1;
 	ip_hdr->ip_p = env->params.protocol;
 	ip_hdr->ip_sum = 0;
 	ip_hdr->ip_src.s_addr = 0;

@@ -13,6 +13,8 @@
 # include <netdb.h>
 # include <sys/time.h>
 
+struct s_packet_node;
+
 typedef struct s_params
 {
 	uint32_t count;
@@ -56,10 +58,18 @@ typedef struct s_env
 	uint32_t count;
 	uint16_t packet_len;
 	uint8_t running;
+	uint8_t send_per_ttl;
 	t_icmp_packet *send_packet_icmp;
 	t_udp_packet *send_packet_udp;
 	t_icmp_time_ex_packet *receive_packet;
+	struct s_packet_node *begin_list;
 } t_env;
+
+typedef struct s_packet_node
+{
+	struct s_packet_node *next;
+	size_t *timers;
+} t_packet_node;
 
 void parse_args(t_env *env, int argc, char **argv);
 void print_usage(int32_t code);
