@@ -63,12 +63,18 @@ typedef struct s_env
 	t_udp_packet *send_packet_udp;
 	t_icmp_time_ex_packet *receive_packet;
 	struct s_packet_node *begin_list;
+	uint32_t max_hops;
+	uint32_t send_per_loop;
+	uint32_t sent_hops;
 } t_env;
 
 typedef struct s_packet_node
 {
 	struct s_packet_node *next;
 	size_t *timers;
+	size_t *received_timers;
+	struct in_addr src_addr;
+	uint8_t printed;
 } t_packet_node;
 
 void parse_args(t_env *env, int argc, char **argv);

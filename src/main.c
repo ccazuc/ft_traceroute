@@ -22,8 +22,11 @@ static t_env *create_env(void)
 	env->receive_socket = 0;
 	env->count = 0;
 	env->running = 1;
-	env->send_per_ttl = 3;
+	env->send_per_ttl = 1;
 	env->begin_list = NULL;
+	env->max_hops = 30;
+	env->send_per_loop = 1;
+	env->sent_hops = 0;
 	return env;
 }
 
@@ -38,7 +41,7 @@ int main(int argc, char **argv)
 	if (!env->dst_param)
 		print_usage(EXIT_FAILURE);
 	resolve_host(env);
-	printf("dst_param %s | dst_name %s | dst_subname %s\n", env->dst_param, env->dst_name, env->dst_subname);
+	//printf("dst_param %s | dst_name %s | dst_subname %s\n", env->dst_param, env->dst_name, env->dst_subname);
 	create_socket(env);
 	build_packet(env);
 	send_packet(env);

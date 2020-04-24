@@ -1,13 +1,82 @@
 #include "ft_traceroute.h"
 
-static void handle_datas(t_env *env)
+static uint8_t check_print(t_env *env, t_packet_node *node, uint8_t index)
 {
+	for (uint8_t k = 0; k < env->send_per_ttl; ++k)
+	{
+		if (!node->received_timers[k])
+			return 0;
+	}
+	if (!node->printed)
+	{
+		node->printed = 1;
+		char ip[17];
+		if (!inet_ntop(env->params.af, &node->src_addr, ip, INET_ADDRSTRLEN))
+			ft_exit("Error, unknown host", EXIT_FAILURE);
+		ip[16] = '\0';
+		char *subname = NULL;
+		struct hostent *hent;
+		if ((hent = gethostbyaddr((char*)&(node->src_addr.s_addr), sizeof(node->src_addr.s_addr), env->params.af)))
+		{
+			if (!(subname = malloc(strlen(hent->h_name) + 1)))
+				ft_exit("Error, could not malloc subname", EXIT_FAILURE);
+			strcpy(subname, hent->h_name);
+		}
+		printf(" %d  %s (%s)", index + 1, subname ? subname : ip, ip);
+		for (uint8_t i = 0; i < env->send_per_ttl; ++i)
+		{
+			printf("  %.3f ms", (node->received_timers[i] - node->timers[i]) / 1000.f);
+		}
+		printf("\n");
+	}
+	return 1;
+}
+
+static void check_node(t_env *env, t_packet_node *node, uint8_t offset, size_t time)
+{
+	node->received_timers[offset] = time;
+	node->src_addr = env->receive_packet->ip_hdr.ip_src;
+	for (uint8_t j = 0; j < env->send_per_ttl; ++j)
+	{
+		if (!node->received_timers[j])
+			return;
+	}
+	t_packet_node *iter_node = env->begin_list;
+	uint8_t j = 0;
+	while (iter_node)
+	{
+		if (!check_print(env, iter_node, j))
+			return;
+		++j;
+		iter_node = iter_node->next;
+	}
+}
+
+static void handle_datas(t_env *env, size_t time)
+{
+	size_t count = env->receive_packet->icmp_hdr_encaps.un.echo.sequence ? env->receive_packet->icmp_hdr_encaps.un.echo.sequence - 1 : env->receive_packet->icmp_hdr.un.echo.sequence - 1;
+	uint32_t node_index = count / env->send_per_ttl;
+	uint8_t offset = count % env->send_per_ttl;
+	t_packet_node *tmp_node = env->begin_list;
+	uint32_t i = 0;
+
+	if (offset >= env->send_per_ttl)
+		return;
+	while (i <= node_index && tmp_node)
+	{
+		if (i == node_index)
+		{
+			check_node(env, tmp_node, offset, time);
+			return;
+		}
+		++i;
+		tmp_node = tmp_node->next;
+	}
 }
 
 static void receive_packet_icmp(t_env *env)
 {
 	int32_t received;
-	char ip[16];
 
 	if ((received = recvfrom(env->receive_socket, env->receive_packet, sizeof(*env->receive_packet) + env->params.payload_size, 0, NULL, NULL)) <= 0)
 	{
@@ -16,10 +85,26 @@ static void receive_packet_icmp(t_env *env)
 		if (received == -1)
 			ft_exit("Error, could not receive packet", EXIT_FAILURE);
 	}
-	printf("Received %d from icmp, icmp_type %d | icmp_code %d | icmp_seq %d | icmp_id %d | icmp_encaps_type %d | icmp_encaps_id %d | icmp_encaps_seq %d\n", received, env->receive_packet->icmp_hdr.type, env->receive_packet->icmp_hdr.code, env->receive_packet->icmp_hdr.un.echo.sequence, env->receive_packet->icmp_hdr.un.echo.id, env->receive_packet->icmp_hdr_encaps.type, env->receive_packet->icmp_hdr_encaps.un.echo.id, env->receive_packet->icmp_hdr_encaps.un.echo.sequence);
+	size_t time = get_time();
+	if ((uint32_t)received < sizeof(env->receive_packet->ip_hdr) + sizeof(env->receive_packet->icmp_hdr))
+		return;
+	if (env->receive_packet->ip_hdr.ip_src.s_addr == env->send_packet_icmp->ip_hdr.ip_dst.s_addr && !env->receive_packet->icmp_hdr.type && !env->receive_packet->icmp_hdr.code && env->receive_packet->icmp_hdr.un.echo.id == getpid())
+	{
+		char ip[17];
+		if (!inet_ntop(env->params.af, &env->receive_packet->ip_hdr.ip_src, ip, INET_ADDRSTRLEN))
+			ft_exit("Error, unknown host for node\n", EXIT_FAILURE);
+		ip[16] = '\0';
+	}
+	//printf("Received %d from icmp, icmp_type %d | icmp_code %d | icmp_seq %d | icmp_id %d | icmp_encaps_type %d | icmp_encaps_id %d | icmp_encaps_seq %d\n", received, env->receive_packet->icmp_hdr.type, env->receive_packet->icmp_hdr.code, env->receive_packet->icmp_hdr.un.echo.sequence, env->receive_packet->icmp_hdr.un.echo.id, env->receive_packet->icmp_hdr_encaps.type, env->receive_packet->icmp_hdr_encaps.un.echo.id, env->receive_packet->icmp_hdr_encaps.un.echo.sequence);
 	if ((uint32_t)received < sizeof(env->receive_packet) || env->receive_packet->icmp_hdr.type != ICMP_TIMXCEED || env->receive_packet->icmp_hdr.code || (env->receive_packet->icmp_hdr_encaps.un.echo.id != getpid() && env->receive_packet->icmp_hdr.un.echo.id != getpid()))
 		return;
-	handle_datas(env);
+	char ip[17];
+	if (!inet_ntop(env->params.af, &env->receive_packet->ip_hdr.ip_src, ip, INET_ADDRSTRLEN))
+		ft_exit("Error, unknown host for node\n", EXIT_FAILURE);
+	ip[16] = '\0';
+	//printf(" %s\n", ip);
+	handle_datas(env, time);
+	send_packet(env);
 }
 
 static void receive_packet_udp(t_env *env)

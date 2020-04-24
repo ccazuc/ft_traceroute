@@ -9,7 +9,6 @@ static void alloc_packet(t_env *env)
 		memset(env->send_packet_icmp, 0, sizeof(env->send_packet_icmp->ip_hdr) + ICMP_MINLEN + env->params.payload_size);
 		if (!(env->receive_packet = malloc(sizeof(*env->receive_packet) + env->params.payload_size)))
 			ft_exit("Error, coult not malloc receive_packet", EXIT_FAILURE);
-		printf("%p => %p\n", env->send_packet_icmp, (unsigned char*)env->send_packet_icmp + sizeof(env->send_packet_icmp->ip_hdr) + ICMP_MINLEN + env->params.payload_size);
 	}
 	else if (env->params.protocol == IPPROTO_UDP)
 	{
