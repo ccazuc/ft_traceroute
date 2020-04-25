@@ -9,9 +9,7 @@ static void build_datas(t_env *env)
 		if (env->params.payload_size >= sizeof(size_t))
 		{
 			size_t time = get_time();
-			//memcpy(((unsigned char*)env->send_packet_icmp) + env->packet_len - env->params.payload_size, &time, sizeof(time));
 			memcpy(((unsigned char*)env->send_packet_icmp) + sizeof(*env->send_packet_icmp), &time, sizeof(time));
-			//printf("time %ld, %lx\n", time, time);
 		}
 		build_icmp_checksum(env);
 	}
@@ -44,12 +42,11 @@ static void add_node(t_env *env)
 		memset(env->begin_list->received_timers, 0, sizeof(*env->begin_list->received_timers) * env->send_per_ttl);
 		env->begin_list->printed = 0;
 		env->begin_list->timers[env->count % env->send_per_ttl] = get_time();
-		//printf("Begin created timer %ld\n\n", env->begin_list->timers[env->count % env->send_per_ttl]);
+		env->begin_list->src_addr.s_addr = 0;
 	}
 	else if (!node_index)
 	{
 		env->begin_list->timers[env->count % env->send_per_ttl] = get_time();
-		//printf("Begin found %d, timer %ld\n\n", env->count % env->send_per_ttl, env->begin_list->timers[env->count % env->send_per_ttl]);
 	}
 	else
 	{
@@ -61,7 +58,6 @@ static void add_node(t_env *env)
 			if (i == node_index)
 			{
 				tmp_node->timers[env->count % env->send_per_ttl] = get_time();
-				//printf("Node found %d, %d, timer %ld\n\n", node_index, env->count % env->send_per_ttl, tmp_node->timers[env->count % env->send_per_ttl]);
 				return;
 			}
 			last_node = tmp_node;
@@ -80,8 +76,8 @@ static void add_node(t_env *env)
 		new_node->next = NULL;
 		new_node->printed = 0;
 		last_node->next = new_node;
+		new_node->src_addr.s_addr = 0;
 		new_node->timers[env->count % env->send_per_ttl] = get_time();
-		//printf("Node created %d, %d, timer %ld\n\n", node_index, env->count % env->send_per_ttl, new_node->timers[env->count % env->send_per_ttl]);
 	}
 }
 
@@ -112,6 +108,5 @@ void send_packet(t_env *env)
 		}
 		++env->send_packet_icmp->ip_hdr.ip_ttl;
 		++env->sent_hops;
-		//printf("%d %d %d\n", i, limit, env->max_hops);
 	}
 }

@@ -35,6 +35,5 @@ void resolve_host(t_env *env)
 		return;
 	if (!(env->dst_subname = malloc(strlen(hent->h_name) + 1)))
 		ft_exit("Error, could not malloc dst_subname", EXIT_FAILURE);
-	//printf("hent_name %s\n", hent->h_name);
 	strcpy(env->dst_subname, hent->h_name);
 }

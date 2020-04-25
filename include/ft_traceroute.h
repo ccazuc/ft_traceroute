@@ -12,6 +12,10 @@
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <sys/time.h>
+# include <pthread.h>
+# include <sys/select.h>
+
+# define MISSED_PING_TIMER 1
 
 struct s_packet_node;
 
@@ -66,6 +70,11 @@ typedef struct s_env
 	uint32_t max_hops;
 	uint32_t send_per_loop;
 	uint32_t sent_hops;
+	pthread_t thread;
+	fd_set read_set;
+	struct timeval select_timeout;
+	size_t timeout;
+	uint32_t number_printed;
 } t_env;
 
 typedef struct s_packet_node
@@ -88,5 +97,7 @@ void build_icmp_checksum(t_env *env);
 size_t get_time();
 void send_packet(t_env *env);
 void receive_packet(t_env *env);
+void create_thread(t_env *env);
+void print_node(t_env *env, t_packet_node *node, uint32_t index);
 
 #endif

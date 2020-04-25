@@ -76,7 +76,6 @@ static void build_udp_packet(t_env *env)
 	env->send_packet_udp->udp_hdr.uh_dport = htons(33433);
 	env->send_packet_udp->udp_hdr.uh_ulen = htons((sizeof(env->send_packet_udp->udp_hdr) + env->params.payload_size));
 	printf("len %d\n", env->send_packet_udp->udp_hdr.uh_ulen);
-	//env->send_packet_udp->udp_hdr.uh_sum = 0x1234;
 	env->packet_len = sizeof(env->send_packet_udp->ip_hdr) + sizeof(env->send_packet_udp->udp_hdr) + env->params.payload_size;
 }
 
