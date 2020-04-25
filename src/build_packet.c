@@ -53,7 +53,7 @@ static void build_ip_header(t_env *env)
 	ip_hdr->ip_tos = IPTOS_LOWDELAY;
 	ip_hdr->ip_id = 0;
 	ip_hdr->ip_off = ntohs(IP_DF);
-	ip_hdr->ip_ttl = 1;
+	ip_hdr->ip_ttl = env->default_ttl;
 	ip_hdr->ip_p = env->params.protocol;
 	ip_hdr->ip_sum = 0;
 	ip_hdr->ip_src.s_addr = 0;

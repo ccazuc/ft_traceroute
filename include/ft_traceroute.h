@@ -75,6 +75,7 @@ typedef struct s_env
 	struct timeval select_timeout;
 	size_t timeout;
 	uint32_t number_printed;
+	uint8_t default_ttl;
 } t_env;
 
 typedef struct s_packet_node
@@ -99,5 +100,6 @@ void send_packet(t_env *env);
 void receive_packet(t_env *env);
 void create_thread(t_env *env);
 void print_node(t_env *env, t_packet_node *node, uint32_t index);
+void print_version();
 
 #endif

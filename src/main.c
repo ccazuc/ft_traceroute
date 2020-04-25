@@ -31,6 +31,7 @@ static t_env *create_env(void)
 	env->select_timeout.tv_usec = 0;
 	env->timeout = 1000000;
 	env->number_printed = 0;
+	env->default_ttl = 1;
 	return env;
 }
 

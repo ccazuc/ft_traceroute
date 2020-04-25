@@ -2,7 +2,15 @@
 
 void print_usage(int32_t code)
 {
-	printf("Usage:\n  traceroute destination\n");
+	printf("Usage:\n  traceroute [ -V ] [ -f first_ttl ] [ -m max_ttl ] [ -q nqueries ] host\n");
+	printf("Options:\n");
+	printf("  -f first_ttl  --first=first_ttl\n                              Start from the first_ttl hop (instead from 1)\n");
+	printf("  -m max_ttl  --max-hops=max_ttl\n                              Set the max number of hops (max TTL to be\n                              reached). Default is 30\n");
+	printf("  -q nqueries  --queries=nqueries\n                              Set the number of probes per each hop. Default is\n                              3\n");
+	printf("  -V  --version               Print version info and exit\n");
+	printf("  --help                      Read this help and exit\n\n");
+	printf("Arguments:\n");
+	printf("+     host          The host to traceroute to\n");
 	exit(code);
 }
 
@@ -16,6 +24,11 @@ void print_unknown_dst(char *dst)
 {
 	printf("ping: %s: Nom ou service inconnu\n", dst);
 	exit(EXIT_FAILURE);
+}
+
+void print_version()
+{
+	ft_exit("Modern traceroute for Linux, version i.d.k\nCopyright (c) 2020 Mideas", EXIT_SUCCESS);
 }
 
 void print_node(t_env *env, t_packet_node *node, uint32_t index)
