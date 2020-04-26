@@ -2,7 +2,7 @@
 
 void print_usage(int32_t code)
 {
-	printf("Usage:\n  traceroute [ -V ] [ -f first_ttl ] [ -m max_ttl ] [ -q nqueries ] host\n");
+	printf("Usage:\n  traceroute [ -V ] [ -f first_ttl ] [ -m max_ttl ] [ -w MAX ] [ -q nqueries ] host [ packetlen ]\n");
 	printf("Options:\n");
 	printf("  -f first_ttl  --first=first_ttl\n                              Start from the first_ttl hop (instead from 1)\n");
 	printf("  -m max_ttl  --max-hops=max_ttl\n                              Set the max number of hops (max TTL to be\n                              reached). Default is 30\n");
