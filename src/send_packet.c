@@ -29,6 +29,7 @@ static void build_datas(t_env *env)
 static void add_node(t_env *env)
 {
 	uint32_t node_index = env->count / env->send_per_ttl;
+	size_t time = get_time();
 	if (!env->begin_list)
 	{
 		if (!(env->begin_list = malloc(sizeof(*env->begin_list))))
@@ -38,10 +39,11 @@ static void add_node(t_env *env)
 		if (!(env->begin_list->received_timers = malloc(sizeof(*env->begin_list->received_timers) * env->send_per_ttl)))
 			ft_exit("Error, could not malloc begin_list->received_timers", EXIT_FAILURE);
 		env->begin_list->next = NULL;
-		memset(env->begin_list->timers, 0, sizeof(*env->begin_list->timers) * env->send_per_ttl);
+		for (uint8_t i = 0; i < env->send_per_ttl; ++i)
+			env->begin_list->timers[i] = time;
 		memset(env->begin_list->received_timers, 0, sizeof(*env->begin_list->received_timers) * env->send_per_ttl);
 		env->begin_list->printed = 0;
-		env->begin_list->timers[env->count % env->send_per_ttl] = get_time();
+		env->begin_list->timers[env->count % env->send_per_ttl] = time;
 		env->begin_list->src_addr.s_addr = 0;
 	}
 	else if (!node_index)
@@ -71,7 +73,8 @@ static void add_node(t_env *env)
 			ft_exit("Error, could not malloc new_node->timers", EXIT_FAILURE);
 		if (!(new_node->received_timers = malloc(sizeof(*new_node->received_timers) * env->send_per_ttl)))
 			ft_exit("Error, could not malloc new_node->received_timers", EXIT_FAILURE);
-		memset(new_node->timers, 0, sizeof(*new_node->timers) * env->send_per_ttl);
+		for (uint8_t i = 0; i < env->send_per_ttl; ++i)
+			new_node->timers[i] = time;
 		memset(new_node->received_timers, 0, sizeof(*new_node->received_timers) * env->send_per_ttl);
 		new_node->next = NULL;
 		new_node->printed = 0;

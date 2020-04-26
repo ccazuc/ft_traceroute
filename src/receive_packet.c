@@ -36,7 +36,7 @@ static void check_node(t_env *env, t_packet_node *node, uint8_t offset, size_t t
 
 static void handle_datas(t_env *env, size_t time)
 {
-	size_t count = env->receive_packet->icmp_hdr_encaps.un.echo.sequence ? env->receive_packet->icmp_hdr_encaps.un.echo.sequence - 1 : env->receive_packet->icmp_hdr.un.echo.sequence - 1;
+	size_t count = env->receive_packet->icmp_hdr.un.echo.sequence ? env->receive_packet->icmp_hdr.un.echo.sequence - 1 : env->receive_packet->icmp_hdr_encaps.un.echo.sequence - 1;
 	uint32_t node_index = count / env->send_per_ttl;
 	uint8_t offset = count % env->send_per_ttl;
 	t_packet_node *tmp_node = env->begin_list;
@@ -73,6 +73,7 @@ static void receive_packet_icmp(t_env *env)
 		if (received == -1)
 			ft_exit("Error, could not receive packet", EXIT_FAILURE);
 	}
+	//printf("Received %d from icmp, icmp_type %d | icmp_code %d | icmp_seq %d | icmp_id %d | icmp_encaps_type %d | icmp_encaps_id %d | icmp_encaps_seq %d\n", received, env->receive_packet->icmp_hdr.type, env->receive_packet->icmp_hdr.code, env->receive_packet->icmp_hdr.un.echo.sequence, env->receive_packet->icmp_hdr.un.echo.id, env->receive_packet->icmp_hdr_encaps.type, env->receive_packet->icmp_hdr_encaps.un.echo.id, env->receive_packet->icmp_hdr_encaps.un.echo.sequence);
 	size_t time = get_time();
 	if ((uint32_t)received < sizeof(env->receive_packet->ip_hdr) + sizeof(env->receive_packet->icmp_hdr))
 		return;
@@ -80,7 +81,6 @@ static void receive_packet_icmp(t_env *env)
 	{
 		handle_datas(env, time);
 	}
-	//printf("Received %d from icmp, icmp_type %d | icmp_code %d | icmp_seq %d | icmp_id %d | icmp_encaps_type %d | icmp_encaps_id %d | icmp_encaps_seq %d\n", received, env->receive_packet->icmp_hdr.type, env->receive_packet->icmp_hdr.code, env->receive_packet->icmp_hdr.un.echo.sequence, env->receive_packet->icmp_hdr.un.echo.id, env->receive_packet->icmp_hdr_encaps.type, env->receive_packet->icmp_hdr_encaps.un.echo.id, env->receive_packet->icmp_hdr_encaps.un.echo.sequence);
 	if ((uint32_t)received < sizeof(env->receive_packet) || env->receive_packet->icmp_hdr.type != ICMP_TIMXCEED || env->receive_packet->icmp_hdr.code || (env->receive_packet->icmp_hdr_encaps.un.echo.id != getpid() && env->receive_packet->icmp_hdr.un.echo.id != getpid()))
 		return;
 	handle_datas(env, time);

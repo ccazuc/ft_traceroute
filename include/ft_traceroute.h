@@ -26,6 +26,7 @@ typedef struct s_params
 	uint8_t verbose;
 	int32_t protocol;
 	int32_t af;
+	uint8_t parsed_payload_size;
 } t_params;
 
 typedef struct s_icmp_packet

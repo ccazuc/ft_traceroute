@@ -3,6 +3,7 @@
 static void check_timeout_packets(t_env *env)
 {
 	size_t time = get_time();
+	uint8_t k = 0;
 	for (t_packet_node *iter = env->begin_list; iter; iter = iter->next)
 	{
 		for (uint8_t i = 0; i < env->send_per_ttl; ++i)
@@ -10,6 +11,7 @@ static void check_timeout_packets(t_env *env)
 			if (!iter->received_timers[i] && time - iter->timers[i] >= env->timeout)
 				iter->received_timers[i] = MISSED_PING_TIMER;
 		}
+		++k;
 	}
 	uint32_t i = 0;
 	for (t_packet_node *iter = env->begin_list; iter; iter = iter->next)

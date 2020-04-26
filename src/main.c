@@ -11,6 +11,7 @@ static t_env *create_env(void)
 	env->params.verbose = 0;
 	env->params.protocol = IPPROTO_ICMP;
 	env->params.af = AF_INET;
+	env->params.parsed_payload_size = 0;
 	env->packet_len = sizeof(env->send_packet_udp->ip_hdr) + sizeof(env->send_packet_udp->udp_hdr) + env->params.payload_size;
 	env->dst_param = NULL;
 	env->dst_bin = NULL;
